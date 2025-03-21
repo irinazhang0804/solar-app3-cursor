@@ -22,20 +22,15 @@ struct ProfileView: View {
                 VStack(spacing: 15) {
                     // 头像和用户名
                     HStack {
-                        Circle()
-                            .fill(Color.green.opacity(0.5))
+                        ImageAssets.userAvatar
                             .frame(width: 60, height: 60)
-                            .overlay(
-                                Text("星")
-                                    .font(.system(size: 24, weight: .bold))
-                                    .foregroundColor(.white)
-                            )
+                            .clipShape(Circle())
                         
                         VStack(alignment: .leading, spacing: 5) {
-                            Text("用户名")
+                            Text("熊大大")
                                 .font(.system(size: 18, weight: .bold))
                             
-                            Text("节气爱好者")
+                            Text("节气达人 Lv.3")
                                 .font(.system(size: 14))
                                 .foregroundColor(.secondary)
                         }

@@ -16,11 +16,11 @@ struct MusicView: View {
     
     // 示例音乐数据
     private let musicList = [
-        MusicData(title: "春江花月夜", artist: "古曲", duration: "5:30", imageName: "music_cover1"),
-        MusicData(title: "高山流水", artist: "古曲", duration: "4:15", imageName: "music_cover2"),
-        MusicData(title: "梅花三弄", artist: "古曲", duration: "3:45", imageName: "music_cover3"),
-        MusicData(title: "二泉映月", artist: "阿炳", duration: "6:20", imageName: "music_cover4"),
-        MusicData(title: "十面埋伏", artist: "古曲", duration: "7:10", imageName: "music_cover5")
+        MusicData(title: "春江花月夜", artist: "古曲", duration: "5:30", imageName: "album"),
+        MusicData(title: "高山流水", artist: "古曲", duration: "4:15", imageName: "album"),
+        MusicData(title: "梅花三弄", artist: "古曲", duration: "3:45", imageName: "album"),
+        MusicData(title: "二泉映月", artist: "阿炳", duration: "6:20", imageName: "album"),
+        MusicData(title: "十面埋伏", artist: "古曲", duration: "7:10", imageName: "album")
     ]
     
     var body: some View {
@@ -49,9 +49,9 @@ struct MusicView: View {
                 if let track = currentTrack {
                     playerView(track: track)
                 } else {
-                    // 默认显示月亮图片
+                    // 默认显示专辑图片
                     ZStack {
-                        ImageAssets.musicBackground
+                        ImageAssets.albumCover
                             .frame(height: 200)
                             .cornerRadius(15)
                             .padding(.horizontal)
@@ -96,14 +96,10 @@ struct MusicView: View {
     
     private func musicRow(music: MusicData) -> some View {
         HStack(spacing: 15) {
-            // 音乐封面
-            Circle()
-                .fill(SolarColors.getSeasonColor(for: solarTerm).opacity(0.3))
+            // 音乐封面 - 使用实际图片
+            ImageAssets.getBundleImage(named: music.imageName)
                 .frame(width: 50, height: 50)
-                .overlay(
-                    Image(systemName: "music.note")
-                        .foregroundColor(SolarColors.getSeasonColor(for: solarTerm))
-                )
+                .clipShape(Circle())
             
             VStack(alignment: .leading, spacing: 5) {
                 Text(music.title)
@@ -147,21 +143,15 @@ struct MusicView: View {
     
     private func playerView(track: MusicData) -> some View {
         VStack(spacing: 20) {
-            // 封面图
-            ZStack {
-                Circle()
-                    .fill(SolarColors.getSeasonColor(for: solarTerm).opacity(0.2))
-                    .frame(width: 180, height: 180)
-                
-                Circle()
-                    .stroke(SolarColors.getSeasonColor(for: solarTerm), lineWidth: 2)
-                    .frame(width: 150, height: 150)
-                
-                Image(systemName: "music.note")
-                    .font(.system(size: 40))
-                    .foregroundColor(SolarColors.getSeasonColor(for: solarTerm))
-            }
-            .padding(.top)
+            // 使用实际专辑封面图
+            ImageAssets.getBundleImage(named: track.imageName)
+                .frame(width: 180, height: 180)
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(SolarColors.getSeasonColor(for: solarTerm), lineWidth: 2)
+                )
+                .padding(.top)
             
             // 歌曲信息
             VStack(spacing: 8) {

@@ -41,6 +41,7 @@ struct TodayView: View {
                         .frame(height: 200)
                         .cornerRadius(15)
                         .clipped()
+                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                     
                     // 图片下方的诗词引用
                     VStack(alignment: .leading) {
@@ -86,8 +87,15 @@ struct DetailSection: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.headline)
+            HStack {
+                Rectangle()
+                    .fill(Color.green)
+                    .frame(width: 4, height: 18)
+                    .cornerRadius(2)
+                
+                Text(title)
+                    .font(.headline)
+            }
             
             Text(content)
                 .font(.body)
@@ -98,5 +106,6 @@ struct DetailSection: View {
         .padding()
         .background(Color.white.opacity(0.9))
         .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
     }
 } 

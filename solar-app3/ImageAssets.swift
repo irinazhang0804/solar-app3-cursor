@@ -1,6 +1,6 @@
 import SwiftUI
 
-// 由于没有实际的图片资产，这个结构体提供SF Symbols图标作为替代
+// 更新为使用实际图片资源而不是SF Symbols图标
 struct ImageAssets {
     // 主要背景图像
     static func getBackgroundImage(for solarTerm: SolarTerm) -> some View {
@@ -18,97 +18,115 @@ struct ImageAssets {
         }
     }
     
-    // 季节背景
+    // 获取特定季节的背景图片
     static var springBackground: some View {
-        ZStack {
-            Color(hex: "F0FFE6")
-            
-            Image(systemName: "leaf.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 100, height: 100)
-                .foregroundColor(Color(hex: "B4E134").opacity(0.3))
-                .offset(x: 120, y: -100)
-            
-            Image(systemName: "drop.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 60, height: 60)
-                .foregroundColor(Color(hex: "B4E134").opacity(0.3))
-                .offset(x: -120, y: 100)
-        }
+        getBundleImage(named: "spring", fallbackSymbol: "leaf.fill")
     }
     
     static var summerBackground: some View {
-        ZStack {
-            Color(hex: "E6F9FF")
-            
-            Image(systemName: "sun.max.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 100, height: 100)
-                .foregroundColor(Color(hex: "1CA0E3").opacity(0.3))
-                .offset(x: 120, y: -100)
-            
-            Image(systemName: "cloud.sun.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 80, height: 80)
-                .foregroundColor(Color(hex: "1CA0E3").opacity(0.3))
-                .offset(x: -120, y: 100)
-        }
+        getBundleImage(named: "summer", fallbackSymbol: "sun.max.fill")
     }
     
     static var autumnBackground: some View {
-        ZStack {
-            Color(hex: "FFF6E6")
-            
-            Image(systemName: "leaf.arrow.triangle.circlepath")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 100, height: 100)
-                .foregroundColor(Color(hex: "F78C35").opacity(0.3))
-                .offset(x: 120, y: -100)
-            
-            Image(systemName: "wind")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 80, height: 80)
-                .foregroundColor(Color(hex: "F78C35").opacity(0.3))
-                .offset(x: -120, y: 100)
-        }
+        getBundleImage(named: "autumn", fallbackSymbol: "leaf.arrow.circlepath")
     }
     
     static var winterBackground: some View {
-        ZStack {
-            Color(hex: "E6EEFF")
-            
-            Image(systemName: "snow")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 100, height: 100)
-                .foregroundColor(Color(hex: "2E618A").opacity(0.3))
-                .offset(x: 120, y: -100)
-            
-            Image(systemName: "thermometer.snowflake")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 80, height: 80)
-                .foregroundColor(Color(hex: "2E618A").opacity(0.3))
-                .offset(x: -120, y: 100)
-        }
+        getBundleImage(named: "winter", fallbackSymbol: "snow")
+    }
+    
+    // 音乐播放器专辑图像
+    static var albumCover: some View {
+        getBundleImage(named: "album", fallbackSymbol: "music.note")
+    }
+    
+    // 用户头像
+    static var userAvatar: some View {
+        getBundleImage(named: "avatar", fallbackSymbol: "person.crop.circle")
     }
     
     // 音乐播放器默认图像
     static var musicBackground: some View {
+        albumCover
+    }
+    
+    // 从图片目录获取图片 - 公开方法
+    static func getBundleImage(named: String, fallbackSymbol: String = "photo") -> some View {
+        // 首先尝试从Assets.xcassets加载图片
+        if let uiImage = UIImage(named: named) {
+            return Image(uiImage: uiImage)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+        }
+        
+        // 尝试从pictures目录加载图片
+        if let picturesPath = getPicturesDirectoryPath() {
+            let imagePath = "\(picturesPath)/\(named).png"
+            if FileManager.default.fileExists(atPath: imagePath) {
+                let url = URL(fileURLWithPath: imagePath)
+                if let imageData = try? Data(contentsOf: url),
+                   let uiImage = UIImage(data: imageData) {
+                    return Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                }
+            }
+        }
+        
+        // 尝试直接从Bundle加载
+        if let path = Bundle.main.path(forResource: named, ofType: "png", inDirectory: "pictures") {
+            let url = URL(fileURLWithPath: path)
+            if let imageData = try? Data(contentsOf: url),
+               let uiImage = UIImage(data: imageData) {
+                return Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            }
+        }
+        
+        // 如果所有尝试都失败，回退到系统图标
+        return createFallbackImage(symbolName: fallbackSymbol)
+    }
+    
+    // 获取pictures目录路径
+    private static func getPicturesDirectoryPath() -> String? {
+        // 1. 尝试从应用包中获取
+        if let bundlePath = Bundle.main.resourceURL?.appendingPathComponent("pictures").path {
+            if FileManager.default.fileExists(atPath: bundlePath) {
+                return bundlePath
+            }
+        }
+        
+        // 2. 尝试从项目源码位置获取
+        let projectPath = "/Users/zhangzhenlan/frontend-learning/my-frontend/cursor-create-application/solar-app3/solar-app3/pictures"
+        if FileManager.default.fileExists(atPath: projectPath) {
+            return projectPath
+        }
+        
+        // 3. 尝试从Documents目录获取
+        if let documentPath = try? FileManager.default.url(for: .documentDirectory, 
+                                                          in: .userDomainMask, 
+                                                          appropriateFor: nil, 
+                                                          create: false).appendingPathComponent("pictures").path {
+            if FileManager.default.fileExists(atPath: documentPath) {
+                return documentPath
+            }
+        }
+        
+        return nil
+    }
+    
+    // 创建一个更美观的回退图片
+    private static func createFallbackImage(symbolName: String) -> some View {
         ZStack {
-            Color(hex: "F5F5F5")
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.gray.opacity(0.2))
             
-            Image(systemName: "music.note")
+            Image(systemName: symbolName)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 80, height: 80)
-                .foregroundColor(.gray.opacity(0.3))
+                .padding(30)
+                .foregroundColor(.gray)
         }
     }
 } 
