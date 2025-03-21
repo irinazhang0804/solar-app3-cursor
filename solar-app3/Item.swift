@@ -9,10 +9,28 @@ import Foundation
 import SwiftData
 
 @Model
-final class Item {
-    var timestamp: Date
+final class SolarTerm {
+    var name: String
+    var englishName: String
+    var date: Date
+    var termDescription: String
+    var farmingActivities: String
+    var climaticFeatures: String
+    var folkCustoms: String
+    var poetry: String
+    var backgroundImageName: String
+    var seasonColor: String
     
-    init(timestamp: Date) {
-        self.timestamp = timestamp
+    init(name: String, englishName: String, date: Date, termDescription: String, farmingActivities: String, climaticFeatures: String, folkCustoms: String, poetry: String, backgroundImageName: String, seasonColor: String) {
+        self.name = name
+        self.englishName = englishName
+        self.date = date
+        self.termDescription = termDescription
+        self.farmingActivities = farmingActivities
+        self.climaticFeatures = climaticFeatures
+        self.folkCustoms = folkCustoms
+        self.poetry = poetry
+        self.backgroundImageName = backgroundImageName
+        self.seasonColor = seasonColor
     }
 }

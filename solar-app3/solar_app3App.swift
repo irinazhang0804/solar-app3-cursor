@@ -10,9 +10,11 @@ import SwiftData
 
 @main
 struct solar_app3App: App {
+    @State private var showLaunchScreen = true
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            SolarTerm.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -25,7 +27,25 @@ struct solar_app3App: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ZStack {
+                ContentView()
+                    .preferredColorScheme(.light) // 默认使用浅色模式
+                
+                // 显示启动屏幕，3秒后自动消失
+                if showLaunchScreen {
+                    LaunchScreen()
+                        .transition(.opacity)
+                        .zIndex(1)
+                }
+            }
+            .onAppear {
+                // 3秒后隐藏启动屏幕
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    withAnimation {
+                        showLaunchScreen = false
+                    }
+                }
+            }
         }
         .modelContainer(sharedModelContainer)
     }

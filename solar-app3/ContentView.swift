@@ -8,48 +8,73 @@
 import SwiftUI
 import SwiftData
 
+enum Tab {
+    case today, calendar, music, profile
+}
+
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @State private var selectedTab: Tab = .today
+    @State private var currentSolarTerm: SolarTerm = SolarTermsData.shared.getCurrentSolarTerm()
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        ZStack {
+            // 背景色根据当前节气变化
+            SolarColors.getSeasonColor(for: currentSolarTerm)
+                .opacity(0.15)
+                .edgesIgnoringSafeArea(.all)
+            
+            VStack {
+                // 内容区域
+                TabView(selection: $selectedTab) {
+                    TodayView(solarTerm: currentSolarTerm)
+                        .tag(Tab.today)
+                    
+                    CalendarView()
+                        .tag(Tab.calendar)
+                    
+                    MusicView(solarTerm: currentSolarTerm)
+                        .tag(Tab.music)
+                    
+                    ProfileView()
+                        .tag(Tab.profile)
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                
+                // 底部导航
+                HStack {
+                    NavButton(
+                        title: "今日",
+                        systemImage: "sun.max",
+                        isActive: selectedTab == .today,
+                        action: { selectedTab = .today }
+                    )
+                    
+                    NavButton(
+                        title: "日历",
+                        systemImage: "calendar",
+                        isActive: selectedTab == .calendar,
+                        action: { selectedTab = .calendar }
+                    )
+                    
+                    NavButton(
+                        title: "音乐",
+                        systemImage: "music.note",
+                        isActive: selectedTab == .music,
+                        action: { selectedTab = .music }
+                    )
+                    
+                    NavButton(
+                        title: "我的",
+                        systemImage: "person",
+                        isActive: selectedTab == .profile,
+                        action: { selectedTab = .profile }
+                    )
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+                .padding(.vertical, 10)
+                .background(Color.white)
+                .cornerRadius(15)
+                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: -2)
+                .padding(.horizontal)
+                .padding(.bottom, 5)
             }
         }
     }
@@ -57,5 +82,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: SolarTerm.self, inMemory: true)
 }
