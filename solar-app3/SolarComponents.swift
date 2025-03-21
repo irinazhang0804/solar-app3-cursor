@@ -7,8 +7,35 @@ struct SolarColors {
     static let autumnOrange = Color(hex: "F78C35")
     static let winterBlue = Color(hex: "2E618A")
     
+    // 深色模式专用颜色
+    static let darkModeText = Color(hex: "E8E8E8")
+    static let darkModeBackground = Color(hex: "121212")
+    static let darkModeSecondary = Color(hex: "B0B0B0")
+    static let darkModeCardBackground = Color(hex: "1E1E1E")
+    static let darkModeSurfaceBackground = Color(hex: "242424")
+    
     static func getSeasonColor(for term: SolarTerm) -> Color {
         return Color(hex: term.seasonColor)
+    }
+    
+    // 获取基于深色模式状态的文本颜色
+    static func textColor(for colorScheme: ColorScheme) -> Color {
+        return colorScheme == .dark ? darkModeText : .primary
+    }
+    
+    // 获取基于深色模式状态的次要文本颜色
+    static func secondaryTextColor(for colorScheme: ColorScheme) -> Color {
+        return colorScheme == .dark ? darkModeSecondary : .secondary
+    }
+    
+    // 获取基于深色模式状态的卡片背景色
+    static func cardBackground(for colorScheme: ColorScheme) -> Color {
+        return colorScheme == .dark ? darkModeCardBackground : .white.opacity(0.9)
+    }
+    
+    // 获取基于深色模式状态的表面背景色
+    static func surfaceBackground(for colorScheme: ColorScheme) -> Color {
+        return colorScheme == .dark ? darkModeSurfaceBackground : .white.opacity(0.9)
     }
 }
 
@@ -128,6 +155,7 @@ struct NavButton: View {
 struct TimelineItem: View {
     var solarTerm: SolarTerm
     var isActive: Bool
+    var colorScheme: ColorScheme
     
     var body: some View {
         HStack(spacing: 15) {
@@ -135,22 +163,29 @@ struct TimelineItem: View {
             VStack {
                 Circle()
                     .fill(isActive ? SolarColors.getSeasonColor(for: solarTerm) : Color.gray.opacity(0.5))
-                    .frame(width: 12, height: 12)
+                    .frame(width: isActive ? 16 : 12, height: isActive ? 16 : 12)
+                    .shadow(color: isActive ? SolarColors.getSeasonColor(for: solarTerm).opacity(0.5) : .clear, radius: 4)
             }
             
             VStack(alignment: .leading, spacing: 5) {
                 Text(solarTerm.name)
                     .font(.system(size: 16, weight: isActive ? .bold : .medium))
-                    .foregroundColor(isActive ? .primary : .secondary)
+                    .foregroundColor(isActive ? SolarColors.textColor(for: colorScheme) : SolarColors.secondaryTextColor(for: colorScheme))
                 
                 Text(dateFormatter.string(from: solarTerm.date))
                     .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(SolarColors.secondaryTextColor(for: colorScheme))
             }
             
             Spacer()
+            
+            // 添加右侧箭头指示
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14))
+                .foregroundColor(isActive ? SolarColors.getSeasonColor(for: solarTerm) : .gray.opacity(0.5))
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
+        .contentShape(Rectangle()) // 扩大点击区域
     }
     
     private var dateFormatter: DateFormatter {

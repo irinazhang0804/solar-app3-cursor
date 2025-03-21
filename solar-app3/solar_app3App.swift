@@ -11,6 +11,7 @@ import SwiftData
 @main
 struct solar_app3App: App {
     @State private var showLaunchScreen = true
+    @AppStorage("isDarkMode") private var isDarkMode = false
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -29,7 +30,7 @@ struct solar_app3App: App {
         WindowGroup {
             ZStack {
                 ContentView()
-                    .preferredColorScheme(.light) // 默认使用浅色模式
+                    .preferredColorScheme(isDarkMode ? .dark : .light)
                 
                 // 显示启动屏幕，3秒后自动消失
                 if showLaunchScreen {
@@ -39,6 +40,9 @@ struct solar_app3App: App {
                 }
             }
             .onAppear {
+                // 设置应用界面风格
+                setAppAppearance()
+                
                 // 确保资源可用
                 ResourceManager.shared.ensureResourcesAvailable()
                 
@@ -54,6 +58,13 @@ struct solar_app3App: App {
             }
         }
         .modelContainer(sharedModelContainer)
+    }
+    
+    // 设置应用外观
+    private func setAppAppearance() {
+        let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+        let window = windowScene?.windows.first
+        window?.overrideUserInterfaceStyle = isDarkMode ? .dark : .light
     }
     
     // 将pictures目录中的图片复制到应用包中

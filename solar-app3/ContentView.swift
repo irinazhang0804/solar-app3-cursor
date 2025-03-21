@@ -15,12 +15,14 @@ enum Tab {
 struct ContentView: View {
     @State private var selectedTab: Tab = .today
     @State private var currentSolarTerm: SolarTerm = SolarTermsData.shared.getCurrentSolarTerm()
+    @AppStorage("isDarkMode") private var isDarkMode = false
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         ZStack {
             // 背景色根据当前节气变化
             SolarColors.getSeasonColor(for: currentSolarTerm)
-                .opacity(0.15)
+                .opacity(isDarkMode ? 0.05 : 0.15)
                 .edgesIgnoringSafeArea(.all)
             
             VStack {
@@ -70,11 +72,22 @@ struct ContentView: View {
                     )
                 }
                 .padding(.vertical, 10)
-                .background(Color.white)
+                .background(
+                    colorScheme == .dark ? 
+                        SolarColors.darkModeBackground.opacity(0.9) : 
+                        Color.white
+                )
                 .cornerRadius(15)
                 .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: -2)
                 .padding(.horizontal)
                 .padding(.bottom, 5)
+            }
+        }
+        .preferredColorScheme(isDarkMode ? .dark : .light)
+        .onChange(of: selectedTab) { newTab in
+            if newTab == .today {
+                // 刷新当前节气数据
+                currentSolarTerm = SolarTermsData.shared.getCurrentSolarTerm()
             }
         }
     }
